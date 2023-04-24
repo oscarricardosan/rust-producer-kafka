@@ -1,6 +1,12 @@
 # Introducción
 
-Esta es una aplicación de prueba que muestra como producir mensajes desde una app Rust a un broker de mensajería 
+Esta aplicación es solo una prueba de concepto, con el fin de evaluar la confiabilidad de los paquetes disponibles en Rust 
+para el uso del broker de mensajería Kafka.
+
+Luego de múltiples pruebas se termino eligiendo el paquete kafka sobre rdkafka, debiodo a que rdkafka generaba entrega exitosa 
+incluso con el host inaccesible, sin embargo, debo reconocer que la velocidad de rdkafka era mejor.
+
+Por si acaso, en el archivo main.rs queda el código de rdkafka. 
 
 # Docker
 
@@ -24,35 +30,5 @@ Generar ejecutable:
 ```bash
 docker exec -it kafka-rust-producer cargo build --release
 docker exec -it kafka-rust-producer  ./target/  
-```
-
-
-# Despliegue
-
-Generar archivo .deb:
-
-```bash
-cargo install cargo-deb --version 1.40.5
-cargo deb
-```
-
-Configurar entorno
-
-```bash
-
-# Instalar .deb
-sudo dpkg -i eclipse_miner_1.0.0_amd64.deb
-
-# Crear carpeta para guardar archivos
-sudo mkdir pasarex_files_main
-
-# Cambiar permisos de carpeta
-sudo chmod -R 777 pasarex_files_main
-
-# Cambiar de directorio
-cd ~/bin/eclipse_miner
-
-# Ejecutar app
-eclipse_miner
 ```
 
