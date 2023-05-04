@@ -1,19 +1,49 @@
+use std::process;
+use std::thread::sleep;
 use std::time::Duration;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::filter::LevelFilter;
 
 use kafka::error::Error as KafkaError;
 use kafka::producer::{Producer, Record, RequiredAcks};
 
-fn main() {
-    env_logger::init();
+use tracing::{info, info_span};
+use url::Url;
+
+
+#[tokio::main]
+async fn main() -> Result<(), tracing_loki::Error> {
+    let (layer, task) = tracing_loki::builder()
+        .label("host", "10.0.0.2")?
+        .label("application", "rust-kafka-producerv2")?
+        .extra_field("pid", format!("{}", process::id()))?
+        .build_url(Url::parse("http://10.0.0.3:3100").unwrap())?;
+
+    // We need to register our layer with `tracing`.
+    tracing_subscriber::registry()
+        .with(layer)
+        .with(LevelFilter::INFO)//Transmita solo los eventos de tipo info
+        // One could add more layers here, for example logging to stdout:
+        // .with(tracing_subscriber::fmt::Layer::new())
+        .init();
+
+    // The background task needs to be spawned so the logs actually get
+    // delivered.
+    tokio::spawn(task);
 
     let broker = "haproxy:9095";
-    let topic = "topic-test";
+    let topic = "compras-ejecutadas";
 
     let data = "hello, kafka 12345";
 
     if let Err(e) = produce_message(data, topic, vec![broker.to_owned()]) {
         println!("Failed producing messages: {:?}", e);
     }
+
+    tokio::time::sleep(Duration::from_secs(1)).await;
+    Ok(())
+
 }
 
 fn produce_message<'a, 'b>(
@@ -29,8 +59,17 @@ fn produce_message<'a, 'b>(
         .with_required_acks(RequiredAcks::One)// ~ require only one broker to ack the message
         .create()?;
 
+    // panic!("No doy mas");
     loop{
         for i in 0..100_000{
+
+            let message= format!("Mensaje id -{} enviado", i).to_string();
+            tracing::info!(
+                task = "rust-kafka-producer",
+                result = "success",
+                message,
+            );
+
             producer.send(&Record {
                 topic,
                 partition: -1, //causes the producer to find out one on its own using its underlying partitioner.
@@ -39,9 +78,10 @@ fn produce_message<'a, 'b>(
             }).unwrap();
 
             println!("enviado {}", i);
+
+            // return Ok(());
         }
     }
-    Ok(())
 }
 
 /*
