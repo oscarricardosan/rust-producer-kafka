@@ -1,5 +1,5 @@
 /target
 /.idea
+/log_app
 .env
-db-certificado-sipex.crt
-db-certificado-eclipse.crt
+db-certificate-cockroach.crt

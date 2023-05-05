@@ -1,0 +1,13 @@
+appenders:
+  stdout:
+    kind: console
+    path: "/home/app/log/app.log"
+    encoder:
+      pattern: "{d(%+)(utc)} [{f}:{L}] {h({l})} {M}:{m}{n}"
+    filters:
+      - kind: threshold
+        level: info
+root:
+  level: info
+  appenders:
+    - stdout
