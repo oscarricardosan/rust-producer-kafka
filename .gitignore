@@ -1,5 +1,5 @@
 /target
 /.idea
-/log_app
+/log
 .env
 db-certificate-cockroach.crt
