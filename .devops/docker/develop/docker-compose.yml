@@ -12,8 +12,8 @@ services:
             - app-network
             - kafka-network
             - cockroach-network
-            -
-    promtail:
+
+    kafka-rust-producerpromtail:
         image: grafana/promtail:2.8.0
         volumes:
             - ../../../log:/var/log
